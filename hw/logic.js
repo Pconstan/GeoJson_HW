@@ -1,5 +1,5 @@
 // Store our API endpoint inside queryUrl
-var queryUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson";
+var queryUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
 
 // Perform a GET request to the query URL
 d3.json(queryUrl, function(data) {
@@ -13,7 +13,9 @@ function createFeatures(earthquakeData) {
   // Give each feature a popup describing the place and time of the earthquake
   function onEachFeature(feature, layer) {
     layer.bindPopup("<h3>" + feature.properties.place +
-      "</h3><hr><p>" + new Date(feature.properties.time) + "</p>" + "<hr><p>" + "Magnitude: " + feature.properties.mag);
+      "</h3><hr><p>" + new Date(feature.properties.time) +
+       "</p>" + "<hr><p>" + "Magnitude: " + 
+       feature.properties.mag + "</p>");
   }
  // Loop through the cities array and create one marker for each object
 
@@ -21,7 +23,24 @@ function createFeatures(earthquakeData) {
   // Create a GeoJSON layer containing the features array on the earthquakeData object
   // Run the onEachFeature function once for each piece of data in the array
   var earthquakes = L.geoJSON(earthquakeData, {
-    onEachFeature: onEachFeature
+    onEachFeature: onEachFeature,
+    pointToLayer: function (feature, latlng) {
+      var color;
+      var r = 255;
+      var g = Math.floor(255-80*feature.properties.mag);
+      var b = Math.floor(255-80*feature.properties.mag);
+      color= "rgb("+r+" ,"+g+","+ b+")"
+      
+      var geojsonMarkerOptions = {
+        radius: 4*feature.properties.mag,
+        fillColor: color,
+        color: "black",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+      };
+      return L.circleMarker(latlng, geojsonMarkerOptions);
+    }
   });
 
   // Sending our earthquakes layer to the createMap function
